@@ -1,0 +1,132 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.northpage</groupId>
+    <artifactId>com.northpage.apps</artifactId>
+    <version>2.4.10</version>
+    <relativePath>../../np-apps</relativePath>
+  </parent>
+
+  <artifactId>com.northpage.w3c.unicorn</artifactId>
+  <name>com.northpage.w3c.unicorn</name>
+  <packaging>war</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <finalName>unicorn</finalName>
+      <plugins>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <!-- <version>3.0.0</version> -->
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>lib</directory>
+            </fileset>
+            <fileset>
+              <directory>dist</directory>
+            </fileset>
+            <fileset>
+              <directory>target</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <configuration>
+              <tasks>
+                <property name="build.compiler" value="extJavac"/>
+                <ant antfile="build.xml" target="retrieve"/>
+                <ant antfile="build.xml" target="war"/>
+                <unzip src="${project.basedir}/dist/unicorn.war" dest="${project.build.directory}/war"/>
+                <copy todir="${project.build.directory}/war/WEB-INF/classes">
+                 <fileset dir="${project.basedir}/WebContent/WEB-INF/conf">
+                     <include name="*.default"/>
+                 </fileset>
+                 <mapper type="regexp" from="^(.*).default" to="\1"/>
+              </copy>
+              <replace file="${project.build.directory}/war/WEB-INF/classes/observers.properties" token="http://validator.w3.org/unicorn" value="resources"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
+            <version>2.2.0</version>
+          </dependency>
+          <dependency>
+ 	      <groupId>ant</groupId>
+ 	      <artifactId>ant-apache-regexp</artifactId>
+ 	      <version>1.6.5</version>
+ 	   </dependency>
+     <dependency>
+            <groupId>jakarta-regexp</groupId>
+             <artifactId>jakarta-regexp</artifactId>
+             <version>1.4</version>
+         </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <!-- <version>3.0.1</version> -->
+        <executions>
+          <execution>
+            <id>copy-contracts</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/war/WEB-INF/classes/resources/contracts</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/WebContent/WEB-INF/resources/contracts</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <!-- <version>2.6</version> -->
+        <configuration>
+          <warSourceDirectory>${project.build.directory}/war</warSourceDirectory>
+          <webXml>${project.build.directory}/war/WEB-INF/web.xml</webXml>
+          <!--
+          <webResources>
+            <resource>
+              <directory>${project.basedir}/WebContent/WEB-INF/resources/contracts</directory>
+            </resource>
+          </webResources>
+        -->
+      </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  </project>
